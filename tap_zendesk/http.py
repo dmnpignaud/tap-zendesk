@@ -1,4 +1,5 @@
 from time import sleep
+import base64
 import backoff
 import requests
 import singer
@@ -114,6 +115,15 @@ def is_fatal(exception):
 
     return 400 <=status_code < 500
 
+def update_authorization_headers(config, headers):
+    if "access_token" in config:
+        headers['Authorization'] = 'Bearer {}'.format(config["access_token"])
+    else:
+        basic_auth_string = '{}/token:{}'.format(config["email"], config["api_token"])
+        encoded_basic_auth = base64.b64encode(basic_auth_string.encode("utf-8")).decode("utf-8")
+        headers['Authorization'] = 'Basic {}'.format(encoded_basic_auth)
+    return headers
+
 def raise_for_error(response):
     """ Error handling method which throws custom error. Class for each error defined above which extends `ZendeskError`.
     This method map the status code with `ERROR_CODE_EXCEPTION_MAPPING` dictionary and accordingly raise the error.
@@ -149,14 +159,7 @@ def call_api(url, request_timeout, params, headers):
     raise_for_error(response)
     return response
 
-def get_cursor_based(url, access_token, request_timeout, page_size, cursor=None, **kwargs):
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer {}'.format(access_token),
-        **kwargs.get('headers', {})
-    }
-
+def get_cursor_based(url, headers, request_timeout, page_size, cursor=None, **kwargs):
     params = {
         'page[size]': page_size,
         **kwargs.get('params', {})
@@ -181,14 +184,7 @@ def get_cursor_based(url, access_token, request_timeout, page_size, cursor=None,
         yield response_json
         has_more = response_json['meta']['has_more']
 
-def get_offset_based(url, access_token, request_timeout, page_size, **kwargs):
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer {}'.format(access_token),
-        **kwargs.get('headers', {})
-    }
-
+def get_offset_based(url, headers, request_timeout, page_size, **kwargs):
     params = {
         'per_page': page_size,
         **kwargs.get('params', {})
@@ -208,13 +204,7 @@ def get_offset_based(url, access_token, request_timeout, page_size, **kwargs):
         yield response_json
         next_url = response_json.get('next_page')
 
-def get_incremental_export(url, access_token, request_timeout, start_time):
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer {}'.format(access_token),
-    }
-
+def get_incremental_export(url, headers, request_timeout, start_time):
     params = {'start_time': start_time}
 
     if not isinstance(start_time, int):

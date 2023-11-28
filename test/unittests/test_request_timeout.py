@@ -58,10 +58,9 @@ class TestRequestTimeoutBackoff(unittest.TestCase):
         """
 
         try:
+            headers={}
             responses = [response for response in http.get_cursor_based(url='some_url',
-                                                                        access_token='some_token',
-                                                                        request_timeout=REQUEST_TIMEOUT,
-                                                                        page_size=PAGE_SIZE)]
+                                                                    headers=headers, request_timeout=REQUEST_TIMEOUT,page_size=PAGE_SIZE)]
         except requests.exceptions.Timeout as e:
             pass
 
@@ -76,8 +75,9 @@ class TestRequestTimeoutBackoff(unittest.TestCase):
         """
 
         try:
+            headers={}
             responses = [response for response in http.get_cursor_based(url='some_url',
-                                                                        access_token='some_token',
+                                                                        headers=headers,
                                                                         request_timeout=REQUEST_TIMEOUT,
                                                                         page_size=PAGE_SIZE)]
         except requests.exceptions.Timeout as e:
@@ -92,8 +92,9 @@ class TestRequestTimeoutBackoff(unittest.TestCase):
         """
         
         try:
+            headers={}
             responses = [response for response in http.get_offset_based(url='some_url',
-                                                                        access_token='some_token',
+                                                                        headers=headers,
                                                                         request_timeout=REQUEST_TIMEOUT,
                                                                         page_size=PAGE_SIZE)]
         except requests.exceptions.Timeout as e:
@@ -110,8 +111,9 @@ class TestRequestTimeoutBackoff(unittest.TestCase):
         """
 
         try:
+            headers={}
             responses = [response for response in http.get_offset_based(url='some_url',
-                                                                        access_token='some_token',
+                                                                        headers=headers,
                                                                         request_timeout=REQUEST_TIMEOUT,
                                                                         page_size=PAGE_SIZE)]
         except requests.exceptions.Timeout as e:
@@ -126,7 +128,8 @@ class TestRequestTimeoutBackoff(unittest.TestCase):
         """
 
         try:
-            responses = [response for response in http.get_incremental_export(url='some_url',access_token='some_token', 
+            headers={}
+            responses = [response for response in http.get_incremental_export(url='some_url', headers=headers,
                                                                               request_timeout=REQUEST_TIMEOUT, start_time= datetime.datetime.utcnow())]
         except requests.exceptions.Timeout as e:
             pass
